@@ -1,0 +1,17 @@
+.DS_Store
+
+.venv
+
+*.bsf
+*.bdf
+
+# ModelSim output
+sim/work/
+sim/transcript
+sim/vsim.wf
+sim/modelsim.ini
+
+# assembler output and binary
+*.mif
+*.mif.mem
+asm/asm
