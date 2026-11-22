@@ -15,3 +15,9 @@ sim/modelsim.ini
 *.mif
 *.mif.mem
 asm/asm
+asm/asm.exe
+
+# keep only Quartus project files
+quartus/*
+!quartus/multicycle.qpf
+!quartus/multicycle.qsf
