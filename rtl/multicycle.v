@@ -50,6 +50,7 @@ wire	[2:0] ALUOp, ALU2;
 wire	[1:0] R1_in;
 wire	Nwire, Zwire;
 reg		N, Z;
+wire	[15:0] performance_counter;
 
 // ------------------------ Input Assignment ------------------------ //
 assign	clock = KEY[1];
@@ -58,7 +59,11 @@ assign	reset =  ~KEY[0]; // KEY is active high
 
 // ------------------- DE2 compatible HEX display ------------------- //
 HEXs	HEX_display(
-	.in0(reg0),.in1(reg1),.in2(reg2),.in3(reg3),.selH(SW[0]),
+	.in0(reg0),
+	.in1(SW[2] ? performance_counter[15:8] : reg1), // upper byte of performance_counter
+	.in2(SW[2] ? performance_counter[7:0] : reg2), // lower byte of performance_counter
+	.in3(reg3),
+	.selH(SW[2] | SW[0]), // when selH is high, it displays inputs on in1, in2 and in3
 	.out0(HEX0),.out1(HEX1),.out2(HEX2),.out3(HEX3),
 	.out4(HEX4),.out5(HEX5)
 );
@@ -81,11 +86,12 @@ assign HEX7 = 7'b1111111;
 */
 
 FSM		Control(
-	.reset(reset),.clock(clock),.N(N),.Z(Z),.instr(IR[3:0]),
+	.reset(reset),.clock(clock),.N(N),.Z(Z),.IR(IR),
 	.PCwrite(PCWrite),.AddrSel(AddrSel),.MemRead(MemRead),.MemWrite(MemWrite),
 	.IRload(IRLoad),.R1Sel(R1Sel),.MDRload(MDRLoad),.R1R2Load(R1R2Load),
 	.ALU1(ALU1),.ALUOutWrite(ALUOutWrite),.RFWrite(RFWrite),.RegIn(RegIn),
-	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp)
+	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp),
+	.performance_counter(performance_counter)
 );
 
 memory	DataMem(

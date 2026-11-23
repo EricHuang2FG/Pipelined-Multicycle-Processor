@@ -19,21 +19,24 @@
 
 module FSM
 (
-reset, instr, clock,
+reset, IR, clock,
 N, Z,
 PCwrite, AddrSel, MemRead,
 MemWrite, IRload, R1Sel, MDRload,
 R1R2Load, ALU1, ALU2, ALUop,
-ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
+ALUOutWrite, RFWrite, RegIn, FlagWrite,//, state
+performance_counter
 );
-	input	[3:0] instr;
+	input	[7:0] IR; // full IR register
 	input	N, Z;
 	input	reset, clock;
 	output	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, MDRload;
 	output	R1R2Load, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	output	[2:0] ALU2, ALUop;
+	output reg [15:0] performance_counter;
 	//output	[3:0] state;
 	
+	wire [3:0] instr; // holds the lower 4 bits of IR
 	reg [3:0]	state;
 	reg	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, MDRload;
 	reg	R1R2Load, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
@@ -46,39 +49,47 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 					c4_ori = 7, c5_ori = 8, c3_load = 9, c4_load = 10,
 					c3_store = 11, c3_bpz = 12, c3_bz = 13, c3_bnz = 14;
 	
+	assign instr = IR[3:0];
+
 	// determines the next state based upon the current state; supports
 	// asynchronous reset
 	always @(posedge clock or posedge reset)
 	begin
-		if (reset) state = reset_s;
-		else
-		begin
+		if (reset) begin
+			state <= reset_s;
+			performance_counter <= 16'b0;
+		end
+		else begin
+			if (!(IR == 8'b00000001 && state == c2))
+				performance_counter <= performance_counter + 1;
 			case(state)
-				reset_s:	state = c1; 		// reset state
-				c1:			state = c2; 		// cycle 1
+				reset_s:	state <= c1; 		// reset state
+				c1:			state <= c2; 		// cycle 1
 				c2:			begin				// cycle 2
-								if(instr == 4'b0100 | instr == 4'b0110 | instr == 4'b1000) state = c3_asn;
-								else if( instr[2:0] == 3'b011 ) state = c3_shift;
-								else if( instr[2:0] == 3'b111 ) state = c3_ori;
-								else if( instr == 4'b0000 ) state = c3_load;
-								else if( instr == 4'b0010 ) state = c3_store;
-								else if( instr == 4'b1101 ) state = c3_bpz;
-								else if( instr == 4'b0101 ) state = c3_bz;
-								else if( instr == 4'b1001 ) state = c3_bnz;
-								else state = 0;
+								if (IR == 8'b10000001) state <= c1; // nop: we do nothing and just go back to c1
+								else if (IR == 8'b00000001) state <= c2; // stop: loop in this state forever
+								else if(instr == 4'b0100 | instr == 4'b0110 | instr == 4'b1000) state <= c3_asn;
+								else if( instr[2:0] == 3'b011 ) state <= c3_shift;
+								else if( instr[2:0] == 3'b111 ) state <= c3_ori;
+								else if( instr == 4'b0000 ) state <= c3_load;
+								else if( instr == 4'b0010 ) state <= c3_store;
+								else if( instr == 4'b1101 ) state <= c3_bpz;
+								else if( instr == 4'b0101 ) state <= c3_bz;
+								else if( instr == 4'b1001 ) state <= c3_bnz;
+								else state <= 0;
 							end
-				c3_asn:		state = c4_asnsh;	// cycle 3: ADD SUB NAND
-				c4_asnsh:	state = c1;			// cycle 4: ADD SUB NAND/SHIFT
-				c3_shift:	state = c4_asnsh;	// cycle 3: SHIFT
-				c3_ori:		state = c4_ori;		// cycle 3: ORI
-				c4_ori:		state = c5_ori;		// cycle 4: ORI
-				c5_ori:		state = c1;			// cycle 5: ORI
-				c3_load:	state = c4_load;	// cycle 3: LOAD
-				c4_load:	state = c1; 		// cycle 4: LOAD
-				c3_store:	state = c1; 		// cycle 3: STORE
-				c3_bpz:		state = c1; 		// cycle 3: BPZ
-				c3_bz:		state = c1; 		// cycle 3: BZ
-				c3_bnz:		state = c1; 		// cycle 3: BNZ
+				c3_asn:		state <= c4_asnsh;	// cycle 3: ADD SUB NAND
+				c4_asnsh:	state <= c1;			// cycle 4: ADD SUB NAND/SHIFT
+				c3_shift:	state <= c4_asnsh;	// cycle 3: SHIFT
+				c3_ori:		state <= c4_ori;		// cycle 3: ORI
+				c4_ori:		state <= c5_ori;		// cycle 4: ORI
+				c5_ori:		state <= c1;			// cycle 5: ORI
+				c3_load:	state <= c4_load;	// cycle 3: LOAD
+				c4_load:	state <= c1; 		// cycle 4: LOAD
+				c3_store:	state <= c1; 		// cycle 3: STORE
+				c3_bpz:		state <= c1; 		// cycle 3: BPZ
+				c3_bz:		state <= c1; 		// cycle 3: BZ
+				c3_bnz:		state <= c1; 		// cycle 3: BNZ
 			endcase
 		end
 	end
