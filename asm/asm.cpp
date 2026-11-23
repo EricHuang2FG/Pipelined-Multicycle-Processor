@@ -523,7 +523,7 @@ int main(int argc, char* argv[])
 			  }
 			else if (col2 == "nop")
 			  {
-			    encoding = 10;
+			    encoding = 129;
 			  }
 			
 			mem[cur_address] = (char) encoding;
