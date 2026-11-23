@@ -378,17 +378,16 @@ int main(int argc, char* argv[])
 				char c_encoding;
 				// single character?
 				if (col3.length() == 3 && col3[0] == '\'' && col3[2] == '\'')
-					c_encoding = col3[1];
+					encoding = (int) col3[1];
 				else
 				{
-					c_encoding = (char) processNumber(col3);
+					encoding = processNumber(col3);
 					if (encoding < -128 || encoding > 127)
 					{
 						cerr << "Error: line " << line_count << ", invalid argument to 'db'." << endl;
 						exit(1);
 					}
 				}
-				encoding = (int) c_encoding;
 			}
 			else if (col2 == "load")
 			{
