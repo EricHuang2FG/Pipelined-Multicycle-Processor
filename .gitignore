@@ -21,3 +21,6 @@ asm/asm.exe
 quartus/*
 !quartus/multicycle.qpf
 !quartus/multicycle.qsf
+
+*.ver
+*.wlf

@@ -59,10 +59,10 @@ assign	reset =  ~KEY[0]; // KEY is active high
 
 // ------------------- DE2 compatible HEX display ------------------- //
 HEXs	HEX_display(
-	.in0(reg0),
+	.in0(SW[2] ? 8'b0 : reg0),
 	.in1(SW[2] ? performance_counter[15:8] : reg1), // upper byte of performance_counter
 	.in2(SW[2] ? performance_counter[7:0] : reg2), // lower byte of performance_counter
-	.in3(reg3),
+	.in3(SW[2] ? 8'b0 : reg3),
 	.selH(SW[2] | SW[0]), // when selH is high, it displays inputs on in1, in2 and in3
 	.out0(HEX0),.out1(HEX1),.out2(HEX2),.out3(HEX3),
 	.out4(HEX4),.out5(HEX5)

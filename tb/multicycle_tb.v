@@ -14,7 +14,8 @@ module multicycle_tb;
 	wire	[7:0] LEDG;
 	wire	[17:0] LEDR;
 
-	wire	[1:0] KEY, SW;
+	wire	[1:0] KEY;
+	wire	[4:0] SW;
 	
 	reg reset; // active-low
 	reg clock;
@@ -35,5 +36,7 @@ module multicycle_tb;
 
 	assign	KEY[1] = clock;
 	assign	KEY[0] =  ~reset; // KEY is active high
+
+	assign SW[4:0] = 5'b00000;
 
 endmodule
