@@ -40,8 +40,8 @@ output reg [17:0] LEDR;
 // ------------------------- Registers/Wires ------------------------ //
 wire	clock, reset;
 wire	IRLoad, MDRLoad, MemRead, MemWrite, PCWrite, RegIn, AddrSel;
-wire	ALU1, ALUOutWrite, FlagWrite, R1R2Load, R1Sel, RFWrite;
-wire	[7:0] R2wire, PCwire, R1wire, RFout1wire, RFout2wire;
+wire	ALU1, ALUOutWrite, FlagWrite, R1Ld, R2Ld, R1Sel, R2Sel, RFWrite;
+wire	[7:0] R2wire, PCwire, R1wire, RFout1wire, RFout2wire, R2_in;
 wire	[7:0] ALU1wire, ALU2wire, ALUwire, ALUOut, MDRwire, MEMwire;
 wire	[7:0] IR, SE4wire, ZE5wire, ZE3wire, AddrWire, RegWire;
 wire	[7:0] reg0, reg1, reg2, reg3;
@@ -88,7 +88,7 @@ assign HEX7 = 7'b1111111;
 FSM		Control(
 	.reset(reset),.clock(clock),.N(N),.Z(Z),.IR(IR),
 	.PCwrite(PCWrite),.AddrSel(AddrSel),.MemRead(MemRead),.MemWrite(MemWrite),
-	.IRload(IRLoad),.R1Sel(R1Sel),.MDRload(MDRLoad),.R1R2Load(R1R2Load),
+	.IRload(IRLoad),.R1Sel(R1Sel),.R2Sel(R2Sel),.MDRload(MDRLoad),.R1Ld(R1Ld),.R2Ld(R2Ld),
 	.ALU1(ALU1),.ALUOutWrite(ALUOutWrite),.RFWrite(RFWrite),.RegIn(RegIn),
 	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp),
 	.performance_counter(performance_counter)
@@ -127,13 +127,13 @@ register_8bit	PC(
 );
 
 register_8bit	R1(
-	.clock(clock),.aclr(reset),.enable(R1R2Load),
+	.clock(clock),.aclr(reset),.enable(R1Ld),
 	.data(RFout1wire),.q(R1wire)
 );
 
 register_8bit	R2(
-	.clock(clock),.aclr(reset),.enable(R1R2Load),
-	.data(RFout2wire),.q(R2wire)
+	.clock(clock),.aclr(reset),.enable(R2Ld),
+	.data(R2_in),.q(R2wire)
 );
 
 register_8bit	ALUOut_reg(
@@ -144,6 +144,11 @@ register_8bit	ALUOut_reg(
 mux2to1_2bit		R1Sel_mux(
 	.data0x(IR[7:6]),.data1x(constant[1:0]),
 	.sel(R1Sel),.result(R1_in)
+);
+
+mux2to1_8bit R2Sel_mux (
+	.data0x(RFout2wire),.data1x(R2wire + 8'b00000001),
+	.sel(R2Sel), .result(R2_in)
 );
 
 mux2to1_8bit 		AddrSel_mux(
@@ -200,15 +205,15 @@ begin
     2'b00:
     begin
       LEDR[9] = 0;
-      LEDR[8] = 0;
-      LEDR[7] = PCWrite;
-      LEDR[6] = AddrSel;
-      LEDR[5] = MemRead;
-      LEDR[4] = MemWrite;
-      LEDR[3] = IRLoad;
-      LEDR[2] = R1Sel;
-      LEDR[1] = MDRLoad;
-      LEDR[0] = R1R2Load;
+      LEDR[8] = PCWrite;
+      LEDR[7] = AddrSel;
+      LEDR[6] = MemRead;
+      LEDR[5] = MemWrite;
+      LEDR[4] = IRLoad;
+      LEDR[3] = R1Sel;
+      LEDR[2] = MDRLoad;
+      LEDR[1] = R2Ld;
+      LEDR[0] = R1Ld;
     end
 
     2'b01:

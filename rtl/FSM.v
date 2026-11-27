@@ -22,24 +22,24 @@ module FSM
 reset, IR, clock,
 N, Z,
 PCwrite, AddrSel, MemRead,
-MemWrite, IRload, R1Sel, MDRload,
-R1R2Load, ALU1, ALU2, ALUop,
+MemWrite, IRload, R1Sel, R2Sel, MDRload,
+R1Ld, R2Ld, ALU1, ALU2, ALUop,
 ALUOutWrite, RFWrite, RegIn, FlagWrite,//, state
 performance_counter
 );
 	input	[7:0] IR; // full IR register
 	input	N, Z;
 	input	reset, clock;
-	output	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, MDRload;
-	output	R1R2Load, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
+	output	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, R2Sel, MDRload;
+	output	R1Ld, R2Ld, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	output	[2:0] ALU2, ALUop;
 	output reg [15:0] performance_counter;
 	//output	[3:0] state;
 	
 	wire [3:0] instr; // holds the lower 4 bits of IR
 	reg [3:0]	state;
-	reg	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, MDRload;
-	reg	R1R2Load, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
+	reg	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, R2Sel, MDRload;
+	reg	R1Ld, R2Ld, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	reg	[2:0] ALU2, ALUop;
 	
 	
@@ -106,8 +106,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -124,8 +126,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 1;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b001;
 					ALUop = 3'b000;
@@ -142,8 +146,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 1;
+					R1Ld = 1;
+					R2Ld = 1;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -162,8 +168,10 @@ performance_counter
 								MemWrite = 0;
 								IRload = 0;
 								R1Sel = 0;
+								R2Sel = 0;
 								MDRload = 0;
-								R1R2Load = 0;
+								R1Ld = 0;
+								R2Ld = 0;
 								ALU1 = 1;
 								ALU2 = 3'b000;
 								ALUop = 3'b000;
@@ -181,8 +189,10 @@ performance_counter
 								MemWrite = 0;
 								IRload = 0;
 								R1Sel = 0;
+								R2Sel = 0;
 								MDRload = 0;
-								R1R2Load = 0;
+								R1Ld = 0;
+								R2Ld = 0;
 								ALU1 = 1;
 								ALU2 = 3'b000;
 								ALUop = 3'b001;
@@ -200,8 +210,10 @@ performance_counter
 								MemWrite = 0;
 								IRload = 0;
 								R1Sel = 0;
+								R2Sel = 0;
 								MDRload = 0;
-								R1R2Load = 0;
+								R1Ld = 0;
+								R2Ld = 0;
 								ALU1 = 1;
 								ALU2 = 3'b000;
 								ALUop = 3'b011;
@@ -219,8 +231,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -237,8 +251,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 1;
 					ALU2 = 3'b100;
 					ALUop = 3'b100;
@@ -255,8 +271,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 1;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 1;
+					R1Ld = 1;
+					R2Ld = 1;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -273,8 +291,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 1;
 					ALU2 = 3'b011;
 					ALUop = 3'b010;
@@ -291,8 +311,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 1;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -309,8 +331,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 1;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -327,8 +351,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -345,8 +371,10 @@ performance_counter
 					MemWrite = 1;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
@@ -363,8 +391,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b010;
 					ALUop = 3'b000;
@@ -381,8 +411,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b010;
 					ALUop = 3'b000;
@@ -399,8 +431,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b010;
 					ALUop = 3'b000;
@@ -417,8 +451,10 @@ performance_counter
 					MemWrite = 0;
 					IRload = 0;
 					R1Sel = 0;
+					R2Sel = 0;
 					MDRload = 0;
-					R1R2Load = 0;
+					R1Ld = 0;
+					R2Ld = 0;
 					ALU1 = 0;
 					ALU2 = 3'b000;
 					ALUop = 3'b000;
