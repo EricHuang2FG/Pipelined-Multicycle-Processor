@@ -37,7 +37,7 @@ output	[6:0] HEX0, HEX1, HEX2, HEX3;
 output	[6:0] HEX4, HEX5;
 output reg [17:0] LEDR;
 
-// ------------------------- Registers/Wires ------------------------ //
+// ------------------------- Registers/Wires for Base Processor ------------------------ //
 wire	clock, reset;
 wire	IRLoad, MDRLoad, MemRead, MemWrite, PCWrite, RegIn, AddrSel;
 wire	ALU1, ALUOutWrite, FlagWrite, R1Ld, R2Ld, R1Sel, R2Sel, RFWrite;
@@ -51,6 +51,16 @@ wire	[1:0] R1_in;
 wire	Nwire, Zwire;
 reg		N, Z;
 wire	[15:0] performance_counter;
+
+// registers/wires for vector extension
+wire	X1Load, X2Load, VoutSel, VRFWrite;
+wire	[31:0] VRFout1wire, VRFout2wire, X1wire, X2wire;
+wire	[7:0] T0_mux_out, T1_mux_out, T2_mux_out, T3_mux_out;
+wire	[7:0] T0_reg_out, T1_reg_out, T2_reg_out, T3_reg_out;
+wire	T0Ld, T1Ld, T2Ld, T3Ld;
+wire	[2:0] MemIn;
+wire	[7:0] MemIn_mux_out;
+
 
 // ------------------------ Input Assignment ------------------------ //
 assign	clock = KEY[1];
@@ -91,12 +101,15 @@ FSM		Control(
 	.IRload(IRLoad),.R1Sel(R1Sel),.R2Sel(R2Sel),.MDRload(MDRLoad),.R1Ld(R1Ld),.R2Ld(R2Ld),
 	.ALU1(ALU1),.ALUOutWrite(ALUOutWrite),.RFWrite(RFWrite),.RegIn(RegIn),
 	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp),
+	.VRFWrite(VRFWrite),.X1Load(X1Load),.X2Load(X2Load),
+	.T0Ld(T0Ld),.T1Ld(T1Ld),.T2Ld(T2Ld),.T3Ld(T3Ld),
+	.VoutSel(VoutSel),.MemIn(MemIn),
 	.performance_counter(performance_counter)
 );
 
 memory	DataMem(
 	.MemRead(MemRead),.wren(MemWrite),.clock(clock),
-	.address(AddrWire),.data(R1wire),.q(MEMwire)
+	.address(AddrWire),.data(MemIn_mux_out),.q(MEMwire)
 );
 
 ALU		ALU(
@@ -109,6 +122,13 @@ RF		RF_block(
 	.dataw(RegWire),.reg1(R1_in),.reg2(IR[5:4]),
 	.regw(R1_in),.data1(RFout1wire),.data2(RFout2wire),
 	.r0(reg0),.r1(reg1),.r2(reg2),.r3(reg3)
+);
+
+VRF VRF_block (
+	.clock(clock), .reset(reset), .VRFWrite(VRFWrite),
+	.vdataw({T0_reg_out, T1_reg_out, T2_reg_out, T3_reg_out}),
+	.vreg1(IR[7:6]), .vreg2(IR[5:4]), .vregw(IR[7:6]),
+	.vdata1(VRFout1wire), .vdata2(VRFout2wire)
 );
 
 register_8bit	IR_reg(
@@ -136,9 +156,59 @@ register_8bit	R2(
 	.data(R2_in),.q(R2wire)
 );
 
+register_32bit X1 (
+	.clock(clock), .aclr(reset), .enable(X1Load),
+	.data(VRFout1wire), .q(X1wire)
+);
+
+register_32bit X2 (
+	.clock(clock), .aclr(reset), .enable(X2Load),
+	.data(VRFout2wire), .q(X2wire)
+);
+
+register_8bit T0 (
+	.clock(clock), .aclr(reset), .enable(T0Ld),
+	.data(T0_mux_out), .q(T0_reg_out)
+);
+
+register_8bit T1 (
+	.clock(clock), .aclr(reset), .enable(T1Ld),
+	.data(T1_mux_out), .q(T1_reg_out)
+);
+
+register_8bit T2 (
+	.clock(clock), .aclr(reset), .enable(T2Ld),
+	.data(T2_mux_out), .q(T2_reg_out)
+);
+
+register_8bit T3 (
+	.clock(clock), .aclr(reset), .enable(T3Ld),
+	.data(T3_mux_out), .q(T3_reg_out)
+);
+
 register_8bit	ALUOut_reg(
 	.clock(clock),.aclr(reset),.enable(ALUOutWrite),
 	.data(ALUwire),.q(ALUOut)
+);
+
+mux2to1_8bit T0_mux (
+	.data0x(X1wire[31:24] + X2wire[31:24]), .data1x(MEMwire),
+	.sel(VoutSel), .result(T0_mux_out)
+);
+
+mux2to1_8bit T1_mux (
+	.data0x(X1wire[23:16] + X2wire[23:16]), .data1x(MEMwire),
+	.sel(VoutSel), .result(T1_mux_out)
+);
+
+mux2to1_8bit T2_mux (
+	.data0x(X1wire[15:8] + X2wire[15:8]), .data1x(MEMwire),
+	.sel(VoutSel), .result(T2_mux_out)
+);
+
+mux2to1_8bit T3_mux (
+	.data0x(X1wire[7:0] + X2wire[7:0]), .data1x(MEMwire),
+	.sel(VoutSel), .result(T3_mux_out)
 );
 
 mux2to1_2bit		R1Sel_mux(
@@ -169,6 +239,11 @@ mux2to1_8bit 		ALU1_mux(
 mux5to1_8bit 		ALU2_mux(
 	.data0x(R2wire),.data1x(constant),.data2x(SE4wire),
 	.data3x(ZE5wire),.data4x(ZE3wire),.sel(ALU2),.result(ALU2wire)
+);
+
+mux5to1_8bit		MemIn_mux (
+	.data0x(X1wire[31:24]), .data1x(X1wire[23:16]), .data2x(X1wire[15:8]), .data3x(X1wire[7:0]),
+	.data4x(R1wire), .sel(MemIn), .result(MemIn_mux_out)
 );
 
 sExtend		SE4(.in(IR[7:4]),.out(SE4wire));
