@@ -14,4 +14,3 @@ module mux2to1_2bit (
 	assign result = sel ? data1x : data0x;
 
 endmodule
-

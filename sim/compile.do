@@ -13,5 +13,5 @@ vlog -vlog01compat -work work ../rtl/RF.v
 vlog -vlog01compat -work work ../rtl/extend.v
 vlog -vlog01compat -work work ../rtl/HEX.v
 vlog -vlog01compat -work work ../rtl/FSM.v
+vlog -vlog01compat -work work ../rtl/VRF.v
 vlog -vlog01compat -work work ../tb/multicycle_tb.v
-

@@ -66,6 +66,4 @@ mux2to1_8bit	b2v_inst3(
 	.data1x(SYNTHESIZED_WIRE_2),
 	.result(q));
 
-
-
 endmodule

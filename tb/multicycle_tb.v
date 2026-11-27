@@ -20,10 +20,10 @@ module multicycle_tb;
 	reg reset; // active-low
 	reg clock;
 
-	multicycle DUT(
-					SW, KEY, HEX0, HEX1, HEX2, HEX3,
-					HEX4, HEX5, LEDR
-					);
+	multicycle DUT (
+		SW, KEY, HEX0, HEX1, HEX2, HEX3,
+		HEX4, HEX5, LEDR
+	);
 	
 	initial begin
 		clock = 1'b0;
@@ -37,6 +37,6 @@ module multicycle_tb;
 	assign	KEY[1] = clock;
 	assign	KEY[0] =  ~reset; // KEY is active high
 
-	assign SW[4:0] = 5'b00000;
+	assign SW[4:0] = 5'b00000; // drive switches to 0 to display default values
 
 endmodule
