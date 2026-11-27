@@ -14,4 +14,3 @@ module mux2to1_8bit(
 	assign result = sel ? data1x : data0x;
 
 endmodule
-
