@@ -17,15 +17,16 @@
 //
 // ---------------------------------------------------------------------
 
-module FSM
-(
-reset, IR, clock,
-N, Z,
-PCwrite, AddrSel, MemRead,
-MemWrite, IRload, R1Sel, R2Sel, MDRload,
-R1Ld, R2Ld, ALU1, ALU2, ALUop,
-ALUOutWrite, RFWrite, RegIn, FlagWrite,//, state
-performance_counter
+module FSM (
+	reset, IR, clock,
+	N, Z,
+	PCwrite, AddrSel, MemRead,
+	MemWrite, IRload, R1Sel, R2Sel, MDRload,
+	R1Ld, R2Ld, ALU1, ALU2, ALUop,
+	ALUOutWrite, RFWrite, RegIn, FlagWrite, // state
+	VRFWrite, X1Load, X2Load, T0Ld, T1Ld, T2Ld, T3Ld,
+	VoutSel, MemIn,
+	performance_counter
 );
 	input	[7:0] IR; // full IR register
 	input	N, Z;
@@ -33,15 +34,18 @@ performance_counter
 	output	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, R2Sel, MDRload;
 	output	R1Ld, R2Ld, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	output	[2:0] ALU2, ALUop;
+	output	VRFWrite, X1Load, X2Load, T0Ld, T1Ld, T2Ld, T3Ld;
+	output	VoutSel;
+	output	[2:0] MemIn;
 	output reg [15:0] performance_counter;
-	//output	[3:0] state;
 	
 	wire [3:0] instr; // holds the lower 4 bits of IR
 	reg [3:0]	state;
 	reg	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, R2Sel, MDRload;
 	reg	R1Ld, R2Ld, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	reg	[2:0] ALU2, ALUop;
-	
+	reg VRFWrite, X1Load, X2Load, T0Ld, T1Ld, T2Ld, T3Ld, VoutSel;
+	reg [2:0] MemIn;
 	
 	// state constants (note: asn = add/sub/nand, asnsh = add/sub/nand/shift)
 	parameter [3:0] reset_s = 0, c1 = 1, c2 = 2, c3_asn = 3,
@@ -117,6 +121,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end					
 			c1: 		//control = 19'b1110100000010000000;
 				begin
@@ -137,6 +150,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end	
 			c2: 		//control = 19'b0000000100000000000;
 				begin
@@ -157,6 +179,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_asn:		begin
 							if ( instr == 4'b0100 ) 		// add
@@ -179,6 +210,15 @@ performance_counter
 								RFWrite = 0;
 								RegIn = 0;
 								FlagWrite = 1;
+								MemIn = 3'b100;
+								VRFWrite = 0;
+								X1Load = 0;
+								X2Load = 0;
+								VoutSel = 0;
+								T0Ld = 0;
+								T1Ld = 0;
+								T2Ld = 0;
+								T3Ld = 0;
 							end	
 							else if ( instr == 4'b0110 ) 	// sub
 								//control = 19'b0000000010000011001;
@@ -200,6 +240,15 @@ performance_counter
 								RFWrite = 0;
 								RegIn = 0;
 								FlagWrite = 1;
+								MemIn = 3'b100;
+								VRFWrite = 0;
+								X1Load = 0;
+								X2Load = 0;
+								VoutSel = 0;
+								T0Ld = 0;
+								T1Ld = 0;
+								T2Ld = 0;
+								T3Ld = 0;
 							end
 							else 							// nand
 								//control = 19'b0000000010000111001;
@@ -221,6 +270,15 @@ performance_counter
 								RFWrite = 0;
 								RegIn = 0;
 								FlagWrite = 1;
+								MemIn = 3'b100;
+								VRFWrite = 0;
+								X1Load = 0;
+								X2Load = 0;
+								VoutSel = 0;
+								T0Ld = 0;
+								T1Ld = 0;
+								T2Ld = 0;
+								T3Ld = 0;
 							end
 				   		end
 			c4_asnsh: 	//control = 19'b0000000000000000100;
@@ -242,6 +300,15 @@ performance_counter
 					RFWrite = 1;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_shift: 	//control = 19'b0000000011001001001;
 				begin
@@ -262,6 +329,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 1;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_ori: 	//control = 19'b0000010100000000000;
 				begin
@@ -282,6 +358,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c4_ori: 	//control = 19'b0000000010110101001;
 				begin
@@ -302,6 +387,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 1;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c5_ori: 	//control = 19'b0000010000000000100;
 				begin
@@ -322,6 +416,15 @@ performance_counter
 					RFWrite = 1;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_load: 	//control = 19'b0010001000000000000;
 				begin
@@ -342,6 +445,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c4_load: 	//control = 19'b0000000000000001110;
 				begin
@@ -362,6 +474,15 @@ performance_counter
 					RFWrite = 1;
 					RegIn = 1;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_store: 	//control = 19'b0001000000000000000;
 				begin
@@ -382,6 +503,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_bpz: 	//control = {~N,18'b000000000100000000};
 				begin
@@ -402,6 +532,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_bz: 		//control = {Z,18'b000000000100000000};
 				begin
@@ -422,6 +561,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			c3_bnz: 	//control = {~Z,18'b000000000100000000};
 				begin
@@ -442,6 +590,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 			default:	//control = 19'b0000000000000000000;
 				begin
@@ -462,6 +619,15 @@ performance_counter
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					MemIn = 3'b100;
+					VRFWrite = 0;
+					X1Load = 0;
+					X2Load = 0;
+					VoutSel = 0;
+					T0Ld = 0;
+					T1Ld = 0;
+					T2Ld = 0;
+					T3Ld = 0;
 				end
 		endcase
 	end
